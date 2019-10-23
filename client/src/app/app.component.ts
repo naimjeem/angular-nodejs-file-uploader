@@ -16,14 +16,9 @@ import {
 
 export class AppComponent implements OnInit {
   selectedFile;
-  // fReader;
-  // name = '';
   uploadPercent;
-
   color = 'primary';
   mode = 'determinate';
-  // value = 50.25890809809;
-
   selectedFiles = [];
   verticalPosition: MatSnackBarVerticalPosition = 'top';
   horizontalPosition: MatSnackBarHorizontalPosition = 'center';
@@ -39,16 +34,12 @@ export class AppComponent implements OnInit {
     public snackBar: MatSnackBar,
   ) {}
 
-  ngOnInit() {
-   
-  }
+  ngOnInit() {}
 
   dragOverHandler(event) {
     console.log('files in drop zone');
-
     event.preventDefault();
     event.stopPropagation();
-    
   }
 
   dropHandler(event) {
@@ -143,19 +134,12 @@ export class AppComponent implements OnInit {
   }
 
   resumeUpload(file) {
-    // let fileId = `${this.selectedFile.name}-${this.selectedFile.lastModified}`;
     let headers2 = new HttpHeaders({
       'size': file.selectedFile.size.toString(),
       'x-file-id': file.fileId,
       'x-start-byte': file.uploadedBytes.toString(),
       'name': file.fileName
     });
-
-    // console.log(JSON.stringify(res));
-    // if(res.status === 'file is present'){
-    //   alert(res.status);
-    //   return;
-    // }
 
     const req = new HttpRequest('POST', 'http://localhost:3000/upload', file.selectedFile.slice(file.uploadedBytes, file.selectedFile.size + 1), {
       headers: headers2,
@@ -184,7 +168,7 @@ export class AppComponent implements OnInit {
   deleteFile(file) {
     this.selectedFiles.splice(this.selectedFiles.indexOf(file), 1);
     console.log('====================================');
-    console.log(file);
+    console.log(file, ' Deleted');
     console.log('====================================');
   }
 }

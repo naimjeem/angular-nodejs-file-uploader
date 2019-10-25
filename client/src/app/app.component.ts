@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
   }
 
   dropHandler(event) {
-    event.preventDefault();
+
     console.log(event.dataTransfer.items.length);
     
     if (event.dataTransfer.items) {
@@ -72,6 +72,8 @@ export class AppComponent implements OnInit {
         console.log('====================================');
       }
     }
+
+    event.preventDefault();
   }
 
   onFileSelect(event) {
@@ -97,7 +99,9 @@ export class AppComponent implements OnInit {
   }
 
   uploadFiles() {
-    console.log(this.selectedFiles.length);
+    if (this.selectedFiles.length === 0) {
+      this.snackBar.open('No File Selected', 'close', this.snackBarConfig);
+    }
 
     if (this.selectedFiles.length <= 5) {
       this.selectedFiles.forEach(file => {
@@ -141,20 +145,24 @@ export class AppComponent implements OnInit {
       'name': file.fileName
     });
 
-    const req = new HttpRequest('POST', 'http://localhost:3000/upload', file.selectedFile.slice(file.uploadedBytes, file.selectedFile.size + 1), {
-      headers: headers2,
-      reportProgress: true
-    });
+    const req = new HttpRequest(
+      'POST',
+      'http://localhost:3000/upload',
+      file.selectedFile.slice(file.uploadedBytes, file.selectedFile.size + 1), 
+      { headers: headers2, reportProgress: true }
+    );
+    
     this.http.request(req)
       .subscribe(
         (res: any) => {
-          if (res.type === HttpEventType.UploadProgress){
-            file.uploadPercent = Math.round(100 * (file.uploadedBytes + res.loaded)/res.total);
-            console.log(file.uploadPercent);
+          if (res.type === HttpEventType.UploadProgress) {
+            file.updatedSize =  res.loaded ? file.uploadedBytes + res.loaded : file.uploadedBytes;
+            file.uploadPercent =  Math.round(100 * (file.uploadedBytes + res.loaded) / file.selectedFile.size);
+            console.log(file.uploadPercent, file.uploadedBytes, res.loaded, res.total);
             if(file.uploadPercent >= 100){
               file.uploadCompleted = true;
             }
-          }else{
+          } else {
             console.log(JSON.stringify(res));
             if(this.uploadPercent >= 100){
               file.uploadCompleted = true;
@@ -170,5 +178,11 @@ export class AppComponent implements OnInit {
     console.log('====================================');
     console.log(file, ' Deleted');
     console.log('====================================');
+  }
+
+  formatSize(size) {
+    const unit = 1024;
+    const i = Math.floor(Math.log(size) / Math.log(1024));
+    return (size / Math.pow(unit, i)).toFixed(2) as any * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
   }
 }
